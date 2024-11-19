@@ -12,14 +12,14 @@ public class AlphabeticSequence {
     private static final int BASE_NUMBER = 100;
 
     /** 일련번호 출력 값 */
-    private static final String ATTRIB_STR = "AZ";
+    private static final String ATTRIB_STR = "0Z";
 
     public static void main(String[] args) throws Exception {
         HashMap<String, Object> map = new HashMap<String, Object>();
 
         map.put("attr_lvl", 1);
         map.put("start_no", "95");
-        map.put("end_no", "BC");
+        map.put("end_no", "3Z");
 
         int sNum = getAlnumToNumber(map, "start_no");
         int eNum = getAlnumToNumber(map, "end_no");
@@ -41,6 +41,7 @@ public class AlphabeticSequence {
     private static String createNumberToAlnum(int seq) {
         String[] alphabets = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
         String returnStr = "";
+        int quotient = -1, remainde = -1;
 
         try {
             StringBuilder sb = new StringBuilder();
@@ -49,12 +50,13 @@ public class AlphabeticSequence {
                 case "AA":
                 case "AZ":
                 case "ZZ":
+                    // 00~99까지는 변환 불필요
                     if(BASE_NUMBER > seq) return String.valueOf(seq);
 
                     // 첫번째 영문 추출
-                    int quotient = (seq - BASE_NUMBER) / ALPHABET_COUNT;
+                    quotient = (seq - BASE_NUMBER) / ALPHABET_COUNT;
                     // 두번째 영문 추출(나머지)
-                    int remainde = (seq - BASE_NUMBER) % ALPHABET_COUNT;
+                    remainde = (seq - BASE_NUMBER) % ALPHABET_COUNT;
 
                     // 첫번째 영문 + 두번째 영문 연결하기.
                     sb.append(alphabets[quotient]);
@@ -66,6 +68,18 @@ public class AlphabeticSequence {
                 case "0Z":
                 case "9A":
                 case "9Z":
+                    // 00~99까지는 변환 불필요
+                    if(BASE_NUMBER > seq) return String.valueOf(seq);
+
+                    // 첫번째값 추출
+                    quotient = (seq - BASE_NUMBER) / ALPHABET_COUNT;
+                    // 두번째 영문 추출(나머지)
+                    remainde = (seq - BASE_NUMBER) % ALPHABET_COUNT;
+
+                    sb.append(String.valueOf(quotient));
+                    sb.append(alphabets[remainde]);
+
+                    returnStr = sb.toString();
                     break;
                 default:
                     break;
@@ -91,10 +105,11 @@ public class AlphabeticSequence {
                     if(isAlphabet(rangeNo)) return idx;
                     if(isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
 
+                    // 01,..,99,A0,A1,..,Z9
                     idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(0, 1));    // 영문 추출
                     if(idx > -1) {
-                        sequence = 100 + (10*idx) + Integer.parseInt(rangeNo.substring(1, 2));
-                        //(9*idx) : A1~9까지 사용시, (10*idx) : A0~A9까지 사용시
+                        sequence = BASE_NUMBER + (10*idx);
+                        sequence += Integer.parseInt(rangeNo.substring(1, 2));
                     }
                     break;
                 case "0A":
@@ -105,9 +120,13 @@ public class AlphabeticSequence {
                     if(isAlphabet(rangeNo)) return idx;
                     if(isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
 
+                    // 01,..,99,0A,0B,..,9Z
                     idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(1, 2));    // 영문 추출
                     if(idx > -1) {
-                        sequence = 100 + idx + (26 * (Integer.parseInt(rangeNo.substring(0, 1)) -1));
+                        // 01,..,99,1A,1B,..,9Z
+                        //sequence = BASE_NUMBER + (ALPHABET_COUNT * (Integer.parseInt(rangeNo.substring(0, 1)) -1)) + idx;
+                        sequence = BASE_NUMBER + (ALPHABET_COUNT * Integer.parseInt(rangeNo.substring(0, 1)));
+                        sequence += idx;
                     }
                     break;
                 case "AA":
@@ -121,7 +140,7 @@ public class AlphabeticSequence {
                     if(idx == -1)
                         return idx;
 
-                    sequence = 100 + (26 * idx);
+                    sequence = BASE_NUMBER + (ALPHABET_COUNT * idx);
 
                     idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(1, 2));    // 2번째 영문 추출
                     if(idx == -1)
