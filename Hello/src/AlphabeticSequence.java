@@ -1,4 +1,7 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,50 +18,93 @@ public class AlphabeticSequence {
     /** 알파벳 */
     private static final String[] alphabets = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
 
+     /** 일련번호 포맷 컬럼 */
+    private static final String FORMAT_COL = "attr_cls";
+
     /** 일련번호 출력 구분 */
     private static final String ATTRIB_STR = "0Z";
 
     public static void main(String[] args) throws Exception {
-        Map<String, Object> map = new HashMap<String, Object>();
-        List<Map<String, Object>> list = Lists.newArrayList();
+        Map<String, Object> param = new HashMap<String, Object>();
+        //List<Map<String, Object>> list = Lists.newArrayList();
+        List<Map<String, Object>> list = new ArrayList<>();
 
-        map.put("attr_lvl", 1);
-        map.put("start_no", "95");
-        map.put("end_no", "3Z");
-
-        int sNum = createAlnumToNumber(map, "start_no");
-        int eNum = createAlnumToNumber(map, "end_no");
-        if((sNum*eNum) < 0) {
-            System.out.println("구분이 잘못되었거나, 범위를 벗어났습니다.");
-            return;
-        }
-        if(sNum > eNum) {
-            System.out.println("시작번호가 종료번호 보다 클 수 없습니다.");
-            return;
-        }
+        param.put("attr_lvl", 1);
+        param.put(FORMAT_COL, "0Z");
+        param.put("start_no", "95");
+        param.put("end_no", "3Z");
         // list에 map를 담는다.
-        list.add(map);
+        list.add(param);
 
         // map Initial
-        //map = new HashMap<String, Object>();
+        param = new HashMap<String, Object>();
+        param.put("attr_lvl", 3);
+        param.put(FORMAT_COL, "00");
+        param.put("start_no", "9");
+        param.put("end_no", "13");
+        // list에 map를 담는다.
+        list.add(param);
 
-        while(sNum <= eNum) {
-            System.out.println(sNum + " ===> " + createNumberToAlnum(sNum));
-            sNum++;
+        // map Initial
+        param = new HashMap<String, Object>();
+        param.put("attr_lvl", 2);
+        param.put(FORMAT_COL, "A9");
+        param.put("start_no", "99");
+        param.put("end_no", "A3");
+        // list에 map를 담는다.
+        list.add(param);
+
+        System.out.println("list1===" + list);
+        
+        //오름 차순으로 정렬하기
+        Collections.sort(list, new Comparator<Object>() {
+            // Comparable 인터페이스를 구현하여 전달
+            @Override
+            public int compare(Object s1, Object s2) {
+                return (Integer)((Map<String,Object>)s1).get("attr_lvl") - (Integer)((Map<String,Object>)s2).get("attr_lvl");
+            }
+        });
+        System.out.println("list2===" + list);
+
+        //내림 차순으로 정렬하기
+        Collections.sort(list, new Comparator<Object>() {
+            @Override
+            public int compare(Object s1, Object s2) {
+                return (Integer)((Map<String,Object>)s2).get("attr_lvl") - (Integer)((Map<String,Object>)s1).get("attr_lvl");
+            }
+        });
+        System.out.println("list3===" + list);
+
+        for(Map<String, Object> map: list) {
+            int sNum = createAlnumToNumber(map, "start_no");
+            int eNum = createAlnumToNumber(map, "end_no");
+            if((sNum*eNum) < 0) {
+                System.out.println("구분이 잘못되었거나, 범위를 벗어났습니다.");
+                return;
+            }
+            if(sNum > eNum) {
+                System.out.println("시작번호가 종료번호 보다 클 수 없습니다.");
+                return;
+            }
+
+            while(sNum <= eNum) {
+                System.out.println(sNum + " ===> " + createNumberToAlnum(sNum, map.get(FORMAT_COL).toString()));
+                sNum++;
+            }
         }
     }
 
     /*
      * Number를 출력 구분형태로 치환
      */
-    private static String createNumberToAlnum(int sequence) {
+    private static String createNumberToAlnum(int sequence, String attr_cls) {
         String alNumSeq = "";
 
         try {
             StringBuilder sb = new StringBuilder();
             int quotient = -1, remainde = -1;
 
-            switch(ATTRIB_STR) {
+            switch(attr_cls) {
                 case "AA":
                 case "AZ":
                 case "ZZ":
@@ -111,6 +157,7 @@ public class AlphabeticSequence {
                     alNumSeq = sb.toString();
                     break;
                 default:
+                    alNumSeq = String.valueOf(sequence);
                     break;
             }
         } catch (Exception e) {
@@ -128,8 +175,9 @@ public class AlphabeticSequence {
 
         try {
             String rangeNo = String.valueOf(map.get(column));
+            String attrCls = String.valueOf(map.get(FORMAT_COL));
 
-            switch(ATTRIB_STR) {
+            switch(attrCls) {
                 case "A0":
                 case "A9":
                     if(rangeNo.length() != 2) return idx;
@@ -176,8 +224,6 @@ public class AlphabeticSequence {
                         return idx;
                     
                     sequence = sequence + idx;
-                    break;
-                case "A..Z":
                     break;
                 default:
                     if(isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
