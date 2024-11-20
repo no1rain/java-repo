@@ -11,8 +11,11 @@ public class AlphabeticSequence {
     /** 일련번호(두자리) 초과 값 */
     private static final int BASE_NUMBER = 100;
 
-    /** 일련번호 출력 값 */
+    /** 일련번호 출력 구분 */
     private static final String ATTRIB_STR = "0Z";
+
+    /** 알파벳 */
+    private static final String[] alphabets = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
 
     public static void main(String[] args) throws Exception {
         HashMap<String, Object> map = new HashMap<String, Object>();
@@ -21,9 +24,9 @@ public class AlphabeticSequence {
         map.put("start_no", "95");
         map.put("end_no", "3Z");
 
-        int sNum = getAlnumToNumber(map, "start_no");
-        int eNum = getAlnumToNumber(map, "end_no");
-        if(sNum < 0 || eNum < 0) {
+        int sNum = createAlnumToNumber(map, "start_no");
+        int eNum = createAlnumToNumber(map, "end_no");
+        if((sNum*eNum) < 0) {
             System.out.println("구분이 잘못되었거나, 범위를 벗어났습니다.");
             return;
         }
@@ -38,8 +41,10 @@ public class AlphabeticSequence {
         }
     }
 
+    /*
+     * Number를 출력 구분형태로 치환
+     */
     private static String createNumberToAlnum(int seq) {
-        String[] alphabets = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
         String returnStr = "";
         int quotient = -1, remainde = -1;
 
@@ -81,6 +86,21 @@ public class AlphabeticSequence {
 
                     returnStr = sb.toString();
                     break;
+                case "A0":
+                case "A9":
+                    // 00~99까지는 변환 불필요
+                    if(BASE_NUMBER > seq) return String.valueOf(seq);
+                    
+                    // 첫번째값 추출
+                    quotient = (seq - BASE_NUMBER) / 10;
+                    // 두번째 영문 추출(나머지)
+                    remainde = (seq - BASE_NUMBER) % 10;
+
+                    sb.append(alphabets[quotient]);
+                    sb.append(String.valueOf(remainde));
+
+                    returnStr = sb.toString();
+                    break;
                 default:
                     break;
             }
@@ -90,8 +110,10 @@ public class AlphabeticSequence {
         return returnStr;
     }
 
-    public static int getAlnumToNumber(Map<String, Object> map, String column) {
-        String[] alphabets = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
+    /*
+     * map의 column에서 값을 뽑아 Number로 치환
+     */
+    public static int createAlnumToNumber(Map<String, Object> map, String column) {
         int sequence = 0;
         int idx = -1;
 
@@ -123,8 +145,6 @@ public class AlphabeticSequence {
                     // 01,..,99,0A,0B,..,9Z
                     idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(1, 2));    // 영문 추출
                     if(idx > -1) {
-                        // 01,..,99,1A,1B,..,9Z
-                        //sequence = BASE_NUMBER + (ALPHABET_COUNT * (Integer.parseInt(rangeNo.substring(0, 1)) -1)) + idx;
                         sequence = BASE_NUMBER + (ALPHABET_COUNT * Integer.parseInt(rangeNo.substring(0, 1)));
                         sequence += idx;
                     }
@@ -147,7 +167,6 @@ public class AlphabeticSequence {
                         return idx;
                     
                     sequence = sequence + idx;
-                    // 2. AA~ZZ
                     break;
                 case "A..Z":
                     break;
@@ -156,16 +175,22 @@ public class AlphabeticSequence {
                     break;
             }
         } catch (Exception e) {
-            System.out.println("getAlnumToNumber Exception##" + e.getMessage());
+            System.out.println("createAlnumToNumber Exception##" + e.getMessage());
         }
         return sequence;
     }
 
+    /*
+     * 영문 여부 판별
+     */
     public static boolean isAlphabet(String str) {
         Pattern pattern = Pattern.compile("[^A-Z]");
         return !pattern.matcher(str).find();
     }
 
+    /*
+     * 숫자 여부 판별
+     */
     public static boolean isNumeric(String str) {
         Pattern pattern = Pattern.compile("[^0-9]");
         return !pattern.matcher(str).find();
