@@ -1,24 +1,26 @@
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public class AlphabeticSequence {
 
-    /** 알파벳 갯수 */
-    private static final int ALPHABET_COUNT = 26;
-
     /** 일련번호(두자리) 초과 값 */
     private static final int BASE_NUMBER = 100;
 
-    /** 일련번호 출력 구분 */
-    private static final String ATTRIB_STR = "0Z";
+    /** 알파벳 갯수 */
+    private static final int ALPHABET_COUNT = 26;
 
     /** 알파벳 */
     private static final String[] alphabets = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
 
+    /** 일련번호 출력 구분 */
+    private static final String ATTRIB_STR = "0Z";
+
     public static void main(String[] args) throws Exception {
-        HashMap<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<String, Object>();
+        List<Map<String, Object>> list = Lists.newArrayList();
 
         map.put("attr_lvl", 1);
         map.put("start_no", "95");
@@ -34,9 +36,14 @@ public class AlphabeticSequence {
             System.out.println("시작번호가 종료번호 보다 클 수 없습니다.");
             return;
         }
+        // list에 map를 담는다.
+        list.add(map);
+
+        // map Initial
+        //map = new HashMap<String, Object>();
 
         while(sNum <= eNum) {
-            System.out.println(sNum + "=========>" + createNumberToAlnum(sNum));
+            System.out.println(sNum + " ===> " + createNumberToAlnum(sNum));
             sNum++;
         }
     }
@@ -44,62 +51,64 @@ public class AlphabeticSequence {
     /*
      * Number를 출력 구분형태로 치환
      */
-    private static String createNumberToAlnum(int seq) {
-        String returnStr = "";
-        int quotient = -1, remainde = -1;
+    private static String createNumberToAlnum(int sequence) {
+        String alNumSeq = "";
 
         try {
             StringBuilder sb = new StringBuilder();
+            int quotient = -1, remainde = -1;
 
             switch(ATTRIB_STR) {
                 case "AA":
                 case "AZ":
                 case "ZZ":
                     // 00~99까지는 변환 불필요
-                    if(BASE_NUMBER > seq) return String.valueOf(seq);
+                    if(BASE_NUMBER > sequence) return String.valueOf(sequence);
 
                     // 첫번째 영문 추출
-                    quotient = (seq - BASE_NUMBER) / ALPHABET_COUNT;
+                    quotient = (sequence - BASE_NUMBER) / ALPHABET_COUNT;
                     // 두번째 영문 추출(나머지)
-                    remainde = (seq - BASE_NUMBER) % ALPHABET_COUNT;
+                    remainde = (sequence - BASE_NUMBER) % ALPHABET_COUNT;
 
-                    // 첫번째 영문 + 두번째 영문 연결하기.
+                    // 영문 + 영문 연결하기.
                     sb.append(alphabets[quotient]);
                     sb.append(alphabets[remainde]);
 
-                    returnStr = sb.toString();
+                    alNumSeq = sb.toString();
                     break;
                 case "0A":
                 case "0Z":
                 case "9A":
                 case "9Z":
                     // 00~99까지는 변환 불필요
-                    if(BASE_NUMBER > seq) return String.valueOf(seq);
+                    if(BASE_NUMBER > sequence) return String.valueOf(sequence);
 
                     // 첫번째값 추출
-                    quotient = (seq - BASE_NUMBER) / ALPHABET_COUNT;
+                    quotient = (sequence - BASE_NUMBER) / ALPHABET_COUNT;
                     // 두번째 영문 추출(나머지)
-                    remainde = (seq - BASE_NUMBER) % ALPHABET_COUNT;
+                    remainde = (sequence - BASE_NUMBER) % ALPHABET_COUNT;
 
+                    // 숫자 + 영문 연결하기
                     sb.append(String.valueOf(quotient));
                     sb.append(alphabets[remainde]);
 
-                    returnStr = sb.toString();
+                    alNumSeq = sb.toString();
                     break;
                 case "A0":
                 case "A9":
                     // 00~99까지는 변환 불필요
-                    if(BASE_NUMBER > seq) return String.valueOf(seq);
+                    if(BASE_NUMBER > sequence) return String.valueOf(sequence);
                     
                     // 첫번째값 추출
-                    quotient = (seq - BASE_NUMBER) / 10;
+                    quotient = (sequence - BASE_NUMBER) / 10;
                     // 두번째 영문 추출(나머지)
-                    remainde = (seq - BASE_NUMBER) % 10;
+                    remainde = (sequence - BASE_NUMBER) % 10;
 
+                    // 영문 + 숫자 연결하기
                     sb.append(alphabets[quotient]);
                     sb.append(String.valueOf(remainde));
 
-                    returnStr = sb.toString();
+                    alNumSeq = sb.toString();
                     break;
                 default:
                     break;
@@ -107,7 +116,7 @@ public class AlphabeticSequence {
         } catch (Exception e) {
             System.out.println("createNumberToAlnum Exception##" + e.getMessage());
         }
-        return returnStr;
+        return alNumSeq;
     }
 
     /*
