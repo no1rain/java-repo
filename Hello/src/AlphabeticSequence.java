@@ -26,7 +26,6 @@ public class AlphabeticSequence {
 
     public static void main(String[] args) throws Exception {
         Map<String, Object> param = new HashMap<String, Object>();
-        //List<Map<String, Object>> list = Lists.newArrayList();
         List<Map<String, Object>> list = new ArrayList<>();
 
         param.put("attr_lvl", 1);
@@ -54,28 +53,16 @@ public class AlphabeticSequence {
         // list에 map를 담는다.
         list.add(param);
 
-        System.out.println("list1===" + list);
-        
-        //오름 차순으로 정렬하기
-        Collections.sort(list, new Comparator<Object>() {
-            // Comparable 인터페이스를 구현하여 전달
+        // 오름 차순으로 정렬하기
+        Collections.sort(list, new Comparator<Map<String, Object>>() {
             @Override
-            public int compare(Object s1, Object s2) {
-                return (Integer)((Map<String,Object>)s1).get("attr_lvl") - (Integer)((Map<String,Object>)s2).get("attr_lvl");
+            public int compare(Map<String, Object> s1, Map<String, Object> s2) {
+                return (Integer)s1.get("attr_lvl") - (Integer)s2.get("attr_lvl"); // s1, s2 순서 변경에 따른 오름/내림 차순 변경.
             }
         });
-        System.out.println("list2===" + list);
 
-        //내림 차순으로 정렬하기
-        Collections.sort(list, new Comparator<Object>() {
-            @Override
-            public int compare(Object s1, Object s2) {
-                return (Integer)((Map<String,Object>)s2).get("attr_lvl") - (Integer)((Map<String,Object>)s1).get("attr_lvl");
-            }
-        });
-        System.out.println("list3===" + list);
-
-        for(Map<String, Object> map: list) {
+        List<List<String>> lists = new ArrayList<List<String>>();
+        for(Map<String, Object> map : list) {
             int sNum = createAlnumToNumber(map, "start_no");
             int eNum = createAlnumToNumber(map, "end_no");
             if((sNum*eNum) < 0) {
@@ -87,11 +74,59 @@ public class AlphabeticSequence {
                 return;
             }
 
+            List<String> listSeqs = new ArrayList<>();
             while(sNum <= eNum) {
-                System.out.println(sNum + " ===> " + createNumberToAlnum(sNum, map.get(FORMAT_COL).toString()));
+                //System.out.println(sNum + " ===> " + createNumberToAlnum(sNum, map.get(FORMAT_COL).toString()));
+
+                listSeqs.add(createNumberToAlnum(sNum, map.get(FORMAT_COL).toString()));
+
                 sNum++;
             }
+            lists.add(listSeqs);
         }
+
+        // Cartesian Product of String of Sets
+        List<List<String>> results = cartesianProduct(lists);
+
+        List<String> sequences = new ArrayList<>();
+        String joinStr = null;
+        for(List<String> result : results) {
+            joinStr = String.join("", result);
+
+            // 배열에 담기
+            sequences.add(joinStr);
+        }
+        System.out.println("sequences ===> " + sequences);
+    }
+
+    /*
+     * Cartesian product of an arbitrary number of sets
+     *
+     * Example : cartesianProduct(Arrays.asList(Arrays.asList("Apple", "Banana"), Arrays.asList("Red", "Green", "Blue"), ...));
+     *
+     * Return  : [ [Apple, Red, ...], [Apple, Green, ...], [Apple, Blue, ...], [Banana, Red, ...], [Banana, Green, ...], [Banana, Blue, ...] ]
+     */
+    private static List<List<String>> cartesianProduct(List<List<String>> lists) {
+        List<List<String>> resultLists = new ArrayList<List<String>>();
+
+        if(lists.size() == 0) {
+            resultLists.add(new ArrayList<String>());
+        } else {
+            List<String> firstList = lists.get(0);
+            List<List<String>> remainingLists = cartesianProduct(lists.subList(1, lists.size()));
+
+            for(String condition : firstList) {
+                for(List<String> remainingList : remainingLists) {
+                    ArrayList<String> resultList = new ArrayList<String>();
+
+                    resultList.add(condition);
+                    resultList.addAll(remainingList);
+
+                    resultLists.add(resultList);
+                }
+            }
+        }
+        return resultLists;
     }
 
     /*
