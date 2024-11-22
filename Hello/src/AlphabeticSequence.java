@@ -18,7 +18,7 @@ public class AlphabeticSequence {
     /** 알파벳 */
     private static final String[] alphabets = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
 
-     /** 일련번호 포맷 컬럼 */
+    /** 일련번호 포맷 컬럼 */
     private static final String FORMAT_COL = "attr_cls";
 
     public static void main(String[] args) throws Exception {
@@ -46,9 +46,30 @@ public class AlphabeticSequence {
         param.put("attr_lvl", 2);
         param.put(FORMAT_COL, "A9");
         param.put("start_no", "99");
-        param.put("end_no", "A3");
+        param.put("end_no", "AA");
         // list에 map를 담는다.
         list.add(param);
+
+        List<String> sequences = getGenerateSequence(list);
+
+        if(sequences.size > 0) {
+            int n = 0;
+            for(String seq : sequences) {
+                n++;
+                System.out.printf("[%4d, %s]", n, seq);
+            }
+        }
+    }
+
+    /*
+     * 일련번호 생성
+     *
+     * Example : getGenerateSequence(list)
+     *
+     * Return  : ["09","10",..."99"]
+     */
+    private static List<String> getGenerateSequence(List<Map<String, Object>> list) {
+        if(list.size() == 0) return new ArrayList<String>();
 
         // 오름 차순으로 정렬하기
         Collections.sort(list, new Comparator<Map<String, Object>>() {
@@ -58,22 +79,22 @@ public class AlphabeticSequence {
             }
         });
 
-        // [[]], [[], []], [[], [], []] 형식
+        // 1) [[]], 2) [[], []], 3) [[], [], []] 형식
         List<List<String>> lists = new ArrayList<List<String>>();
         for(Map<String, Object> map : list) {
-            // 화면의 시작/종료 번호로 
+            // 화면의 시작/종료 번호로 숫자 시작/종료 번호로 변환
             int sNum = createAlnumToNumber(map, "start_no");
             int eNum = createAlnumToNumber(map, "end_no");
             if((sNum*eNum) < 0) {
                 System.out.println("구분이 잘못되었거나, 범위를 벗어났습니다.");
-                return;
+                return new ArrayList<String>();
             }
             if(sNum > eNum) {
                 System.out.println("시작번호가 종료번호 보다 클 수 없습니다.");
-                return;
+                return new ArrayList<String>();
             }
 
-            List<String> listSeqs = new ArrayList<>();
+            List<String> listSeqs = new ArrayList<String>();
             while(sNum <= eNum) {
                 //System.out.println(sNum + " ===> " + createNumberToAlnum(sNum, map.get(FORMAT_COL).toString()));
 
@@ -87,7 +108,7 @@ public class AlphabeticSequence {
         // Cartesian Product of String of Sets
         List<List<String>> results = cartesianProduct(lists);
 
-        List<String> sequences = new ArrayList<>();
+        List<String> sequences = new ArrayList<String>();
         String joinStr = null;
         for(List<String> result : results) {
             joinStr = String.join("", result);
@@ -95,10 +116,7 @@ public class AlphabeticSequence {
             // 배열에 담기
             sequences.add(joinStr);
         }
-
-        for(String seq : sequences) {
-            System.out.println("seq ===> " + seq);
-        }
+        return sequences;
     }
 
     /*
