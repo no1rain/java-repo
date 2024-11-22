@@ -21,9 +21,6 @@ public class AlphabeticSequence {
      /** 일련번호 포맷 컬럼 */
     private static final String FORMAT_COL = "attr_cls";
 
-    /** 일련번호 출력 구분 */
-    private static final String ATTRIB_STR = "0Z";
-
     public static void main(String[] args) throws Exception {
         Map<String, Object> param = new HashMap<String, Object>();
         List<Map<String, Object>> list = new ArrayList<>();
@@ -61,8 +58,10 @@ public class AlphabeticSequence {
             }
         });
 
+        // [[]], [[], []], [[], [], []] 형식
         List<List<String>> lists = new ArrayList<List<String>>();
         for(Map<String, Object> map : list) {
+            // 화면의 시작/종료 번호로 
             int sNum = createAlnumToNumber(map, "start_no");
             int eNum = createAlnumToNumber(map, "end_no");
             if((sNum*eNum) < 0) {
@@ -96,7 +95,10 @@ public class AlphabeticSequence {
             // 배열에 담기
             sequences.add(joinStr);
         }
-        System.out.println("sequences ===> " + sequences);
+
+        for(String seq : sequences) {
+            System.out.println("seq ===> " + seq);
+        }
     }
 
     /*
@@ -143,73 +145,62 @@ public class AlphabeticSequence {
             StringBuilder sb = new StringBuilder();
             int quotient = -1, remainde = -1;
 
-            switch(attr_cls) {
-                case "AA":
-                case "AZ":
-                case "ZZ":
-                    // 100 이상 값만 변환대상
-                    if(Integer.compare(sequence, BASE_NUMBER) > -1 ) {
+            if(Arrays.asList("AA","AZ","ZZ").indexOf(attr_cls) > -1) {
+                // 100 이상 값만 변환대상
+                if(Integer.compare(sequence, BASE_NUMBER) > -1 ) {
 
-                        // 첫번째 영문 추출
-                        quotient = (sequence - BASE_NUMBER) / ALPHABET_COUNT;
-                        // 두번째 영문 추출(나머지)
-                        remainde = (sequence - BASE_NUMBER) % ALPHABET_COUNT;
+                    // 첫번째 영문 추출
+                    quotient = (sequence - BASE_NUMBER) / ALPHABET_COUNT;
+                    // 두번째 영문 추출(나머지)
+                    remainde = (sequence - BASE_NUMBER) % ALPHABET_COUNT;
 
-                        // 영문 + 영문 연결하기.
-                        sb.append(alphabets[quotient]);
-                        sb.append(alphabets[remainde]);
+                    // 영문 + 영문 연결하기.
+                    sb.append(alphabets[quotient]);
+                    sb.append(alphabets[remainde]);
 
-                        alNumSeq = sb.toString();
-                    } else {
-                        // 00~99까지는 변환 불필요
-                        alNumSeq = String.valueOf(sequence);
-                    }
-                    break;
-                case "0A":
-                case "0Z":
-                case "9A":
-                case "9Z":
-                    // 100 이상 값만 변환대상
-                    if(Integer.compare(sequence, BASE_NUMBER) > -1 ) {
-
-                        // 첫번째값 추출
-                        quotient = (sequence - BASE_NUMBER) / ALPHABET_COUNT;
-                        // 두번째 영문 추출(나머지)
-                        remainde = (sequence - BASE_NUMBER) % ALPHABET_COUNT;
-
-                        // 숫자 + 영문 연결하기
-                        sb.append(String.valueOf(quotient));
-                        sb.append(alphabets[remainde]);
-
-                        alNumSeq = sb.toString();
-                    } else {
-                        // 00~99까지는 변환 불필요
-                        alNumSeq = String.valueOf(sequence);
-                    }
-                    break;
-                case "A0":
-                case "A9":
-                    // 100 이상 값만 변환대상
-                    if(Integer.compare(sequence, BASE_NUMBER) > -1 ) {
-                        
-                        // 첫번째값 추출
-                        quotient = (sequence - BASE_NUMBER) / 10;
-                        // 두번째 영문 추출(나머지)
-                        remainde = (sequence - BASE_NUMBER) % 10;
-
-                        // 영문 + 숫자 연결하기
-                        sb.append(alphabets[quotient]);
-                        sb.append(String.valueOf(remainde));
-
-                        alNumSeq = sb.toString();
-                    } else {
-                        // 00~99까지는 변환 불필요
-                        alNumSeq = String.valueOf(sequence);
-                    }
-                    break;
-                default:
+                    alNumSeq = sb.toString();
+                } else {
+                    // 00~99까지는 변환 불필요
                     alNumSeq = String.valueOf(sequence);
-                    break;
+                }
+            } else if(Arrays.asList("0A","0Z","9A","9Z").indexOf(attr_cls) > -1) {
+                // 100 이상 값만 변환대상
+                if(Integer.compare(sequence, BASE_NUMBER) > -1 ) {
+
+                    // 첫번째값 추출
+                    quotient = (sequence - BASE_NUMBER) / ALPHABET_COUNT;
+                    // 두번째 영문 추출(나머지)
+                    remainde = (sequence - BASE_NUMBER) % ALPHABET_COUNT;
+
+                    // 숫자 + 영문 연결하기
+                    sb.append(String.valueOf(quotient));
+                    sb.append(alphabets[remainde]);
+
+                    alNumSeq = sb.toString();
+                } else {
+                    // 00~99까지는 변환 불필요
+                    alNumSeq = String.valueOf(sequence);
+                }
+            } else if(Arrays.asList("A0","A9").indexOf(attr_cls) > -1) {
+                // 100 이상 값만 변환대상
+                if(Integer.compare(sequence, BASE_NUMBER) > -1 ) {
+                    
+                    // 첫번째값 추출
+                    quotient = (sequence - BASE_NUMBER) / 10;
+                    // 두번째 영문 추출(나머지)
+                    remainde = (sequence - BASE_NUMBER) % 10;
+
+                    // 영문 + 숫자 연결하기
+                    sb.append(alphabets[quotient]);
+                    sb.append(String.valueOf(remainde));
+
+                    alNumSeq = sb.toString();
+                } else {
+                    // 00~99까지는 변환 불필요
+                    alNumSeq = String.valueOf(sequence);
+                }
+            } else {
+                alNumSeq = String.valueOf(sequence);
             }
         } catch (Exception e) {
             System.out.println("createNumberToAlnum Exception##" + e.getMessage());
@@ -230,54 +221,43 @@ public class AlphabeticSequence {
 
             if(rangeNo.length() < 2 && isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
 
-            switch(attrCls) {
-                case "A0":
-                case "A9":
-                    if(isAlphabet(rangeNo)) return idx;
-                    if(isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
+            if(Arrays.asList("A0","A9").indexOf(attrCls) > -1) {
+                if(isAlphabet(rangeNo)) return idx;
+                if(isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
 
-                    // 01,..,99,A0,A1,..,Z9
-                    idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(0, 1));    // 영문 추출
-                    if(idx > -1) {
-                        sequence = BASE_NUMBER + (10*idx);
-                        sequence += Integer.parseInt(rangeNo.substring(1, 2));
-                    }
-                    break;
-                case "0A":
-                case "0Z":
-                case "9A":
-                case "9Z":
-                    if(isAlphabet(rangeNo)) return idx;
-                    if(isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
+                // 01,..,99,A0,A1,..,Z9
+                idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(0, 1));    // 영문 추출
+                if(idx > -1) {
+                    sequence = BASE_NUMBER + (10*idx);
+                    sequence += Integer.parseInt(rangeNo.substring(1, 2));
+                }
+            } else if(Arrays.asList("0A","0Z","9A","9Z").indexOf(attrCls) > -1) {
+                if(isAlphabet(rangeNo)) return idx;
+                if(isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
 
-                    // 01,..,99,0A,0B,..,9Z
-                    idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(1, 2));    // 영문 추출
-                    if(idx > -1) {
-                        sequence = BASE_NUMBER + (ALPHABET_COUNT * Integer.parseInt(rangeNo.substring(0, 1)));
-                        sequence += idx;
-                    }
-                    break;
-                case "AA":
-                case "AZ":
-                case "ZZ":
-                    if(isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
+                // 01,..,99,0A,0B,..,9Z
+                idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(1, 2));    // 영문 추출
+                if(idx > -1) {
+                    sequence = BASE_NUMBER + (ALPHABET_COUNT * Integer.parseInt(rangeNo.substring(0, 1)));
+                    sequence += idx;
+                }
+            } else if(Arrays.asList("AA","AZ","ZZ").indexOf(attrCls) > -1) {
+                if(isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
 
-                    // 1. 00~ZZ (00~99,AA~ZZ)
-                    idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(0, 1));    // 1번째 영문 추출
-                    if(idx == -1)
-                        return idx;
+                // 00,..,99,AA,AB,..,ZZ
+                idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(0, 1));    // 1번째 영문 추출
+                if(idx == -1)
+                    return idx;
 
-                    sequence = BASE_NUMBER + (ALPHABET_COUNT * idx);
+                sequence = BASE_NUMBER + (ALPHABET_COUNT * idx);
 
-                    idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(1, 2));    // 2번째 영문 추출
-                    if(idx == -1)
-                        return idx;
-                    
-                    sequence = sequence + idx;
-                    break;
-                default:
-                    if(isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
-                    break;
+                idx = Arrays.asList(alphabets).indexOf(rangeNo.substring(1, 2));    // 2번째 영문 추출
+                if(idx == -1)
+                    return idx;
+                
+                sequence = sequence + idx;
+            } else {
+                if(isNumeric(rangeNo)) return Integer.parseInt(rangeNo);
             }
         } catch (Exception e) {
             System.out.println("createAlnumToNumber Exception##" + e.getMessage());
